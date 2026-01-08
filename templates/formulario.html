@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Ejecutar Bot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        form {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 320px;
+            box-shadow: 0 10px 25px rgba(0,0,0,.4);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #22c55e;
+            color: #022c22;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #16a34a;
+        }
+
+        .ok {
+            margin-top: 10px;
+            text-align: center;
+            color: #4ade80;
+        }
+    </style>
+</head>
+<body>
+
+<form method="POST">
+    <h2>Ejecutar Bot</h2>
+
+    <label>Número del punto</label>
+    <input type="text" name="numero_fijo" value="{{ numero_fijo }}" required>
+
+    <label>Cantidad de respuestas</label>
+    <input type="number" name="cantidad" value="{{ cantidad }}" min="1" max="50" required>
+
+    <button type="submit">Ejecutar</button>
+
+    {% if mensaje %}
+        <div class="ok">{{ mensaje }}</div>
+    {% endif %}
+</form>
+
+</body>
+</html>
