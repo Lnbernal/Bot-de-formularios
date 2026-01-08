@@ -4,12 +4,11 @@ import time
 import random
 from datetime import datetime
 
-FORM_URL = "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAAAAAYAAPCgaFNUM0M3Q1lMWENVQU1OU0ZQV1pFVE0xWlZOOS4u"
+FORM_URL = "https://forms.cloud.microsoft/r/0zYh9nCSX9"
 
 def cargar_personas():
     with open("personas.csv", newline="", encoding="utf-8") as f:
         return list(csv.DictReader(f))
-
 
 def responder_formulario(page, persona, i, numero_fijo):
     page.goto(FORM_URL, wait_until="networkidle")
@@ -17,7 +16,6 @@ def responder_formulario(page, persona, i, numero_fijo):
 
     textos = page.get_by_role("textbox")
 
-    # 🔹 Número fijo dinámico
     textos.nth(0).fill(numero_fijo)
 
     page.get_by_role("radiogroup").nth(0).get_by_role("radio").nth(1).click()
@@ -26,55 +24,28 @@ def responder_formulario(page, persona, i, numero_fijo):
         'input[placeholder="Especifique la fecha (d/M/yyyy)"]'
     ).fill(datetime.today().strftime("%d/%m/%Y"))
 
-    nombre_completo = f"{persona['nombre']} {persona['apellido']}"
-    textos.nth(1).fill(nombre_completo)
+    textos.nth(1).fill(f"{persona['nombre']} {persona['apellido']}")
 
     dominio = "@gmail.com" if i % 2 == 0 else "@hotmail.com"
-    nombre = persona["nombre"].lower()
-    apellido = persona["apellido"].lower()
-
-    patrones = [
-        f"{nombre}.{apellido}",
-        f"{nombre}{apellido[0]}",
-        f"{nombre[0]}_{apellido}",
-        f"{apellido}.{nombre}",
-        f"{nombre}{apellido}{i % 100}"
-    ]
-
-    correo = f"{patrones[i % len(patrones)]}{dominio}"
+    correo = f"{persona['nombre'].lower()}{i}{dominio}"
     textos.nth(2).fill(correo)
 
     textos.nth(3).fill(persona["telefono"])
 
-    radiogroups = page.get_by_role("radiogroup")
-    calificacion = "4" if i % 2 == 0 else "5"
-    radiogroups.nth(1).get_by_role("radio", name=calificacion).click()
-
-    nps = ["8", "9", "10"][i % 3]
-    radiogroups.nth(2).locator(f"label:has-text('{nps}')").click()
-
-    if i % 3 == 0 and persona.get("comentario"):
-        textos.last.fill(persona["comentario"])
-
     page.get_by_role("button", name="Enviar").click()
     time.sleep(5)
 
-def ejecutar_bot(max_respuestas=6, numero_fijo="101"):
+def ejecutar_bot(max_respuestas, numero_fijo):
     personas = cargar_personas()
     random.shuffle(personas)
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False, slow_mo=150)
+        browser = p.chromium.launch(headless=True)
         context = browser.new_context()
 
         for i, persona in enumerate(personas[:max_respuestas]):
             page = context.new_page()
-            try:
-                responder_formulario(page, persona, i, numero_fijo)
-                time.sleep(random.uniform(12, 20))
-            except Exception as e:
-                print("❌ Error:", e)
-            finally:
-                page.close()
+            responder_formulario(page, persona, i, numero_fijo)
+            page.close()
 
         browser.close()
