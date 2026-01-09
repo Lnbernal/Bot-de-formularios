@@ -64,7 +64,7 @@ def ejecutar_bot(max_respuestas=6, numero_fijo="101"):
     random.shuffle(personas)
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False, slow_mo=150)
+        browser = p.chromium.launch(headless=True, slow_mo=150)
         context = browser.new_context()
 
         for i, persona in enumerate(personas[:max_respuestas]):
