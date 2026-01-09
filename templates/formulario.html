@@ -80,10 +80,29 @@
 
     <button type="submit">Ejecutar</button>
 
-    {% if mensaje %}
-        <div class="ok">{{ mensaje }}</div>
-    {% endif %}
+    {% if estado == "FINALIZADO" %}
+    <div class="ok">✅ Todos los formularios fueron enviados correctamente</div>
+{% endif %}
+
 </form>
+<script>
+    setInterval(async () => {
+        try {
+            const res = await fetch("/estado");
+            const estado = await res.text();
+
+            if (estado === "FINALIZADO") {
+                if (!document.querySelector(".ok")) {
+                    const div = document.createElement("div");
+                    div.className = "ok";
+                    div.innerText = "✅ Todos los formularios fueron enviados correctamente";
+                    document.querySelector("form").appendChild(div);
+                }
+            }
+        } catch (e) {}
+    }, 3000);
+</script>
+
 
 </body>
 </html>

@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template
 from bot_forms import ejecutar_bot
 import threading
+import os
 
 app = Flask(__name__)
 
@@ -9,10 +10,20 @@ def ejecutar():
     mensaje = None
     cantidad = 6
     numero_fijo = "101"
+    estado_actual = None   # ← RENOMBRADO
+
+    # leer estado si existe
+    if os.path.exists("estado.txt"):
+        with open("estado.txt", encoding="utf-8") as f:
+            estado_actual = f.read().strip()
 
     if request.method == "POST":
-        cantidad = int(request.form.get("cantidad", 6))
-        numero_fijo = request.form.get("numero_fijo", "101")
+        # borrar estado anterior
+        if os.path.exists("estado.txt"):
+            os.remove("estado.txt")
+
+        cantidad = int(request.form.get("cantidad"))
+        numero_fijo = request.form.get("numero_fijo")
 
         hilo = threading.Thread(
             target=ejecutar_bot,
@@ -25,9 +36,18 @@ def ejecutar():
     return render_template(
         "formulario.html",
         mensaje=mensaje,
+        estado=estado_actual,   # ← aquí se pasa al HTML
         cantidad=cantidad,
         numero_fijo=numero_fijo
     )
+
+
+@app.route("/estado")
+def estado_api():
+    if os.path.exists("estado.txt"):
+        with open("estado.txt", encoding="utf-8") as f:
+            return f.read().strip()
+    return "EJECUTANDO"
 
 
 @app.route("/")
