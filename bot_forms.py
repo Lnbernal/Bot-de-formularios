@@ -3,7 +3,7 @@ import csv
 import time
 import random
 from datetime import datetime
-import os
+
 
 
 FORM_URL = "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAAAAAYAAPCgaFNUM0M3Q1lMWENVQU1OU0ZQV1pFVE0xWlZOOS4u"
@@ -14,8 +14,7 @@ def cargar_personas():
 
 
 def responder_formulario(page, persona, i, numero_fijo):
-    page.goto(FORM_URL, wait_until="domcontentloaded")
-    page.wait_for_timeout(3000)
+    page.goto(FORM_URL, wait_until="networkidle")
     page.get_by_role("textbox").first.wait_for(timeout=20000)
 
     textos = page.get_by_role("textbox")
@@ -25,9 +24,15 @@ def responder_formulario(page, persona, i, numero_fijo):
 
     page.get_by_role("radiogroup").nth(0).get_by_role("radio").nth(1).click()
 
-    page.locator(
-        'input[placeholder="Especifique la fecha (d/M/yyyy)"]'
-    ).fill(datetime.today().strftime("%d/%m/%Y"))
+    
+    hoy = datetime.today()
+    fecha_texto = f"{hoy.day}/{hoy.month:02d}/{hoy.year}"
+
+    campo_fecha = page.get_by_label("Fecha de visita")
+
+    campo_fecha.click()
+    campo_fecha.press("Control+A")
+    campo_fecha.type(fecha_texto, delay=120)
 
     nombre_completo = f"{persona['nombre']} {persona['apellido']}"
     textos.nth(1).fill(nombre_completo)
@@ -59,7 +64,10 @@ def responder_formulario(page, persona, i, numero_fijo):
     if i % 3 == 0 and persona.get("comentario"):
         textos.last.fill(persona["comentario"])
 
-    page.get_by_role("button", name="Enviar").click()
+    boton_enviar = page.locator('[data-automation-id="submitButton"]')
+    boton_enviar.scroll_into_view_if_needed()
+    boton_enviar.click()
+
     time.sleep(5)
 
 
@@ -68,17 +76,7 @@ def ejecutar_bot(max_respuestas=6, numero_fijo="101"):
     random.shuffle(personas)
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(
-        headless=False,
-        slow_mo=150,
-        args=[
-            "--disable-blink-features=AutomationControlled",
-            "--no-sandbox",
-            "--disable-dev-shm-usage",
-            "--disable-gpu"
-        ]
-    )
-
+        browser = p.chromium.launch(headless=True, slow_mo=150)
         context = browser.new_context()
 
         for i, persona in enumerate(personas[:max_respuestas]):

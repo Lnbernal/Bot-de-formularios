@@ -11,7 +11,8 @@ def ejecutar():
     cantidad = 6
     numero_fijo = "101"
     estado_actual = None   # ← RENOMBRADO
-
+    if os.path.exists("estado.txt"):
+            os.remove("estado.txt")
     # leer estado si existe
     if os.path.exists("estado.txt"):
         with open("estado.txt", encoding="utf-8") as f:
