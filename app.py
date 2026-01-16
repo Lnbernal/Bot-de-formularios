@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template, send_from_directory
 from playwright.sync_api import sync_playwright
 import csv, time, random, os
-from datetime import datetime
+from datetime import datetime,timedelta
 
 app = Flask(__name__)
 
@@ -24,22 +24,55 @@ def responder_formulario(page, persona, i, numero_fijo, logs):
     textos.nth(0).type(str(numero_fijo))
     page.get_by_role("radiogroup").nth(0).get_by_role("radio").nth(1).click()
 
-    # Fecha
+    # Fecha - CORREGIDO
     campo_fecha = page.get_by_label("Fecha de visita")
     campo_fecha.click()
-    page.wait_for_timeout(1000)
+    page.wait_for_timeout(2000)  # Esperar más tiempo
 
-    hoy = datetime.today()
+    # Usar fecha en formato español local
+    hoy = datetime.now()
     dia_actual = hoy.day
-    dia_siguiente = hoy.day+ 1
-    # Seleccionar directamente el gridcell del día actual
-    if page.locator(f"button[aria-label*='{dia_siguiente}']").count() > 0:
-        page.locator(f"button[aria-label*='{dia_siguiente}']").first.click()
-        print(f"✅ Fecha seleccionada con calendario (día {dia_siguiente})")
-    else:
-        # Si no existe, seleccionar el día actual
-        page.locator(f"button[aria-label*='{dia_actual}']").first.click()
-        print(f"✅ Fecha seleccionada con calendario (día {dia_actual})")
+    mes_actual = hoy.month
+    año_actual = hoy.year
+
+    # Intentar varios formatos para Office 365
+    formato_fechas = [
+        f"{dia_actual} de {hoy.strftime('%B')}",  # "16 de enero"
+        f"{dia_actual}/{mes_actual}/{año_actual}",  # "16/1/2025"
+        f"{dia_actual:02d}/{mes_actual:02d}/{año_actual}",  # "16/01/2025"
+        f"{año_actual}-{mes_actual:02d}-{dia_actual:02d}",  # "2025-01-16"
+        hoy.strftime("%d/%m/%Y"),  # Formato español
+        hoy.strftime("%m/%d/%Y"),  # Formato americano
+    ]
+
+    dia_encontrado = False
+    for formato in formato_fechas:
+        try:
+            locator = f"button[aria-label*='{formato}']"
+            if page.locator(locator).count() > 0:
+                page.locator(locator).first.click()
+                print(f"✅ Fecha seleccionada: {formato}")
+                dia_encontrado = True
+                break
+        except:
+            continue
+
+    # Si no encuentra con los formatos, intentar con el número del día
+    if not dia_encontrado:
+        try:
+            # Buscar el día actual en el calendario
+            page.get_by_role("gridcell").filter(has_text=str(dia_actual)).first.click()
+            print(f"✅ Fecha seleccionada por número: {dia_actual}")
+        except:
+            # Último recurso: usar hoy + 1
+            dia_siguiente = (hoy + timedelta(days=1)).day
+            try:
+                page.locator(f"button[aria-label*='{dia_siguiente}']").first.click()
+                print(f"⚠️ Usando día siguiente: {dia_siguiente}")
+            except:
+                # Si todo falla, escribir manualmente
+                campo_fecha.fill(hoy.strftime("%d/%m/%Y"))
+                print(f"✍️ Fecha escrita manualmente: {hoy.strftime('%d/%m/%Y')}")
 
 
     # Nombre completo
