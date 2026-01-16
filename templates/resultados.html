@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Resultados</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Resultados de ejecución</h2>
+        <ul>
+            {% for log in logs %}
+                <li>{{ log }}</li>
+            {% endfor %}
+        </ul>
+
+        <h3>Screenshots</h3>
+        {% for log in logs %}
+            {% if "Screenshot guardado" in log %}
+                <img src="{{ log.split(': ')[1] }}" alt="Screenshot" style="max-width:100%; margin:10px 0;">
+            {% endif %}
+        {% endfor %}
+    </div>
+</body>
+</html>

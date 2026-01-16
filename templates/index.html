@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Automatización de Encuestas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Enviar encuestas automáticamente</h2>
+        <form method="post">
+            <label for="numero_fijo">Número fijo:</label>
+            <input type="text" id="numero_fijo" name="numero_fijo" required>
+
+            <label for="max_respuestas">Número de encuestas:</label>
+            <input type="number" id="max_respuestas" name="max_respuestas" required>
+
+            <button type="submit">Ejecutar</button>
+        </form>
+    </div>
+</body>
+</html>
