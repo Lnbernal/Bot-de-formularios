@@ -1,7 +1,5 @@
 services:
   - type: web
-    name: encuesta-automation
-    env: python
-    buildCommand: "pip install -r requirements.txt && playwright install"
-    startCommand: "python app.py"
+    name: bot-de-formularios
+    env: docker
     plan: free
