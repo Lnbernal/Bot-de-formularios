@@ -129,12 +129,13 @@ def index():
 
         with sync_playwright() as p:
             browser = p.chromium.launch(
-                headless="new",
+                headless=True,
                 slow_mo=150,
                 args=[
                     "--disable-blink-features=AutomationControlled",
                     "--no-sandbox",
-                    "--disable-dev-shm-usage"
+                    "--disable-dev-shm-usage",
+                    "--disable-gpu"
                 ]
             )
 
