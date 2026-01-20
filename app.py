@@ -1,6 +1,8 @@
+import os
+os.environ["PLAYWRIGHT_BROWSERS_PATH"] = "/opt/render/.cache/ms-playwright"
 from flask import Flask, request, render_template, send_from_directory
 from playwright.sync_api import sync_playwright
-import csv, time, random, os
+import csv, time, random
 from datetime import datetime,timedelta
 
 app = Flask(__name__)
@@ -130,12 +132,12 @@ def index():
         with sync_playwright() as p:
             browser = p.chromium.launch(
                 headless=True,
-                slow_mo=150,
                 args=[
-                    "--no-sandbox",
-                    "--disable-dev-shm-usage",
-                    "--disable-gpu"
-                ]
+                "--no-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-gpu",
+                "--disable-setuid-sandbox"
+            ]
             )
 
             context = browser.new_context(
