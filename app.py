@@ -4,6 +4,13 @@ from flask import Flask, request, render_template, send_from_directory
 from playwright.sync_api import sync_playwright
 import csv, time, random
 from datetime import datetime,timedelta
+import glob
+
+def get_chromium_path():
+    paths = glob.glob("/opt/render/.cache/ms-playwright/chromium-*/chrome-linux/chrome")
+    if not paths:
+        raise RuntimeError("Chromium executable not found")
+    return paths[0]
 
 app = Flask(__name__)
 
@@ -130,14 +137,18 @@ def index():
         logs = []
 
         with sync_playwright() as p:
+
+            chromium_path = get_chromium_path()
+
             browser = p.chromium.launch(
+                executable_path=chromium_path,
                 headless=True,
                 args=[
-                "--no-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-gpu",
-                "--disable-setuid-sandbox"
-            ]
+                    "--no-sandbox",
+                    "--disable-dev-shm-usage",
+                    "--disable-gpu",
+                    "--disable-setuid-sandbox"
+                ]
             )
 
             context = browser.new_context(
