@@ -7,10 +7,21 @@ from datetime import datetime,timedelta
 import glob
 
 def get_chromium_path():
-    paths = glob.glob("/opt/render/.cache/ms-playwright/chromium-*/chrome-linux/chrome")
-    if not paths:
-        raise RuntimeError("Chromium executable not found")
-    return paths[0]
+
+    possible_paths = [
+        "/opt/render/project/.cache/ms-playwright",
+        "/opt/render/.cache/ms-playwright",
+        os.path.expanduser("~/.cache/ms-playwright")
+    ]
+
+    for base in possible_paths:
+        pattern = os.path.join(base, "chromium-*/chrome-linux/chrome")
+        matches = glob.glob(pattern)
+
+        if matches:
+            return matches[0]
+
+    raise RuntimeError("Chromium executable not found in Playwright cache")
 
 app = Flask(__name__)
 
