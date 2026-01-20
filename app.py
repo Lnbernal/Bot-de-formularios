@@ -129,7 +129,6 @@ def index():
 
         with sync_playwright() as p:
             browser = p.chromium.launch(
-                channel="chromium",
                 headless=True,
                 slow_mo=150,
                 args=[

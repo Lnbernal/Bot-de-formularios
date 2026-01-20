@@ -4,29 +4,24 @@ services:
     env: python
     region: ohio
     plan: free
+
     buildCommand: |
       pip install --upgrade pip
       pip install -r requirements.txt
-      # Forzar instalación de Playwright
       python -m playwright install chromium
-      # Instalar dependencias del sistema
-      playwright install-deps
-      # Verificar instalación
-      ls -la /opt/render/.cache/ms-playwright/ || true
+
     startCommand: |
-      # Verificar que Playwright está instalado
-      if [ ! -f /opt/render/.cache/ms-playwright/chromium-*/chrome-linux/chrome ]; then
-        echo "⚠️ Chromium no encontrado, instalando..."
-        python -m playwright install chromium
-      fi
-      gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120 app:app
+      gunicorn app:app \
+        --bind 0.0.0.0:$PORT \
+        --workers 1 \
+        --threads 4 \
+        --timeout 180
+
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
+
       - key: PLAYWRIGHT_BROWSERS_PATH
-        value: /opt/render/.cache/ms-playwright
+        value: /opt/render/project/.cache/ms-playwright
+
     autoDeploy: true
-    disk:
-      name: playwright-cache
-      mountPath: /opt/render/.cache/ms-playwright
-      sizeGB: 1
