@@ -6,23 +6,6 @@ import csv, time, random
 from datetime import datetime,timedelta
 import glob
 
-def get_chromium_path():
-
-    possible_paths = [
-        "/opt/render/project/.cache/ms-playwright",
-        "/opt/render/.cache/ms-playwright",
-        os.path.expanduser("~/.cache/ms-playwright")
-    ]
-
-    for base in possible_paths:
-        pattern = os.path.join(base, "chromium-*/chrome-linux/chrome")
-        matches = glob.glob(pattern)
-
-        if matches:
-            return matches[0]
-
-    raise RuntimeError("Chromium executable not found in Playwright cache")
-
 app = Flask(__name__)
 
 FORM_URL = "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAAAAAYAAPCgaFNUM0M3Q1lMWENVQU1OU0ZQV1pFVE0xWlZOOS4u"
@@ -149,10 +132,7 @@ def index():
 
         with sync_playwright() as p:
 
-            chromium_path = get_chromium_path()
-
             browser = p.chromium.launch(
-                executable_path=chromium_path,
                 headless=True,
                 args=[
                     "--no-sandbox",
